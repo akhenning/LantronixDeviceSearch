@@ -181,6 +181,8 @@ def getType(id):
         return "xPico240"
     if id == "Y3":
         return "xPico250"
+    if id == "X2":
+        return "XPort-03/04"
     if id == "XA":
         return "XPort-IAP"
     if id == "XM":
@@ -197,12 +199,16 @@ def getType(id):
         return "UDS-10/Cobox 4.x"
     if id == "X9":
         return "XPort-05"
+    if id == "U4":
+        return "UDS2100"
     if id == "U5":
         return "XDirect"
     if id == "X7":
         return "XPort Direct"
     if id == "X8":
         return "XPort Direct+"
+    if id == "Y4":
+        return "XPort EDGE"
     if id == "W1":
         return "WiPort"
     if id == "E5":

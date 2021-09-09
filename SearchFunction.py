@@ -24,10 +24,6 @@ from binascii import hexlify, unhexlify
 from socket import socket, SOL_SOCKET, SO_BROADCAST, timeout, AF_INET, SOCK_DGRAM
 # Only used in searchIPFromMac() to wait for search to finish
 from time import sleep
-# Used in graphics
-from tkinter import Tk, Frame, Label, Button
-# Used for lines in output
-from tkinter.ttk import Separator
 # Used to search and keep GUI running
 from threading import Thread
 # Also used to decode hex strings
@@ -35,9 +31,6 @@ from codecs import decode
 
 # I did my best to import only what I need to try to speed up
 # boot times
-
-gridColor = "#20c0bb"
-HEADER = "#FF69B4"
 
 # Main output string variable that transfers information
 output = ""
@@ -171,165 +164,6 @@ def search():
             print('done searching')
     
 
-class Application(Frame):
-    '''Holds GUI for selecting an IP address from a list'''
-    def __init__(self,master):
-        '''Initalizes frame'''
-        Frame.__init__(self,master)
-        self.grid()
-        self.root = master
-        self.menu()
-        
-    def menu(self):
-        '''The main place the buttons and found devices are displayed.'''
-        self.searching = 0
-        # Set window size and first few descriptive labels.
-        # ...I probably should have collapsed these into one label, in
-        # hindsight. I didn't know you could make multiline labels at first. 
-        self.root.geometry("500x600")
-        self.label1 = Label(self,text="\n\tWelcome to the GridConnect Simple Lantronix Device Search!\n" + 
-                            "\n\tClick the 'Find Devices' button to recieve a list of all Lantronix devices.\n" + 
-                            "\tYou can copy any IP address to clipboard by clicking the button with the IP.", justify="left")
-        self.label1.grid(columnspan=16,sticky='w')
-        self.label4 = Label(self,text="\t\t\t")
-        self.label4.grid()
-
-        # Label that displays the spinner.
-        self.spin = Label(self,text="",font=('TkDefaultFont', 24))
-        self.spin.grid(column = 0, row = 14, sticky = 'e')
-
-        # Make the buttons
-        self.new = Button(self,text="Find Devices",command=self.search,bg="white")
-        self.new.grid(column=1,row=14)
-        self.new2 = Button(self,text="Exit",command=self.exitgame,bg="red")
-        self.new2.grid(column=3,row=14,sticky='e')
-
-        # Final output label
-        self.outputL = Label(self,text="\t")
-        self.outputL.grid(column=0,row=17,columnspan=16,sticky='w')
-
-        # Make empty list that will hold the widgets that contain the output 
-        # of the program
-        self.seriesOfLabels = []
-        # Make variable that saves cycles if nothing has changed since it
-        # last checked
-        self.lastOutput = ""
-
-        # Variables that handle the spinning of the spinner
-        self.counter = 0
-        self.spinner = ['◐','◓','◑','◒']#["◜ ", " ◝", " ◞", "◟ "]
-        self.spinlength = len(self.spinner)
-
-        # Start loop that updates output
-        self.updateOutput()
-    def exitgame(self):
-        '''closes window.'''
-        self.root.destroy() # is this how you do this?  This seems barbaric in hindsight
-    def updateOutput(self):
-        ''' Reads from output variable to update GUI. Rather contrived in how it does it.
-        The grid might look a bit ugly, but it took me a stupid amount of time, so it means a lot to me.
-        '''
-        global output
-        # Only edit if something has changed
-        if self.lastOutput != output:
-            # Clear previous display (dynamically adding/removing is not worth the effort)
-            for tupl in self.seriesOfLabels:
-                tupl[0].grid_forget()
-                tupl[0].destroy()
-                # In try block because the last one only has 3 elements, and 
-                # it wasn't worth trying to find a way to do this without a 
-                # try block since the None will always be the last element.
-                try:
-                    tupl[1].grid_forget()
-                    tupl[1].destroy()
-                    tupl[2].grid_forget()
-                    tupl[2].destroy()
-                    tupl[3].grid_forget()
-                    tupl[3].destroy()
-                except:
-                    pass
-            self.seriesOfLabels = []
-            # This prevents it from rendering grid if no output
-            if output != "":
-                self.outputL['text'] = "\t"
-                lines = output.split('\n')
-
-                # This variable helps the loop tell where to place objects
-                grid = 19
-                # Make topmost line
-                line1 = Separator(self)
-                line1.grid(row = 18, column = 1, columnspan=2, sticky="ew")
-                # Sequentially make labels for each of the devices found
-                for address in lines:
-                    if(address != ""):
-                        addresses = address.split('::')
-                        #self.seriesOfIPA.append(addresses[2])
-
-                        name = Label(self,text=addresses[0] + " ")
-                        mac = Label(self,text=addresses[1])
-                        ip = Label(self, text=addresses[2], cursor = "hand2", highlightthickness = 2, relief = 'raised')
-                        # Make it so you can click on the IP addresses to copy 
-                        # them to clipboard
-                        ip.bind("<Button-1>", self.copy)  
-                        name.grid(column = 0, row = grid, sticky = 'e')
-                        mac.grid(column = 1, row = grid)
-                        ip.grid(column = 2, row = grid)
-
-                        # Add line that separates elements
-                        line = Separator(self)
-                        line.grid(row = grid + 1, column = 1, columnspan = 2, sticky="ew")
-
-                        # Basic iteration stuff
-                        grid += 2
-                        self.seriesOfLabels.append((name, mac, ip, line))
-                        if grid > 32:
-                            self.root.geometry("500x1000")
-                # Fill out the grid with things that go on the side
-                span = grid - 19
-                if span < 1:
-                    span = 1
-                line2 = Separator(self, orient='vertical').grid(column=0, row=19, rowspan=span, sticky='nse')
-                line3 = Separator(self, orient='vertical').grid(column=3, row=19, rowspan=span, sticky='nsw')
-                self.seriesOfLabels.append((line1, line2, line3, None))
-
-                self.lastOutput = output
-        # Call itself soon to update any changes while searching for
-        # devices.
-        if(self.searching > 0): # 5 times a second
-            self.after(200, self.updateOutput)
-            self.searching -= 1
-            if self.searching == 0:
-                self.spin['text'] = ""
-                if output == "":
-                    self.outputL['text'] = "\t[None Found]"
-            else:
-                self.spin['text'] = self.spinner[self.counter] 
-                self.counter += 1
-                if self.counter == self.spinlength:
-                    self.counter = 0
-    def copy(self, event):
-        ''' Simple method to copy button's contents to clipboard.'''
-        cpy = event.widget.cget("text")
-        self.root.clipboard_clear()
- 
-        self.root.clipboard_append(cpy)
-        self.root.update()
-    def search(self):
-        ''' Starts another thread to search for devices.'''
-        # The self.searching variable prevents you from starting another 
-        # search before the previous one has ended
-        if self.searching <= 0:
-            self.searching = (timeoutTime * 5) + 6
-            # Wow, did I really name the method 'search' as well? Uh, so it
-            # targets the global method Search which sends and recieves 
-            # the messages.
-            listener = Thread(target=search, args=(), daemon=True)
-            listener.start()
-        # Calls the update output method, which will continue to run 5 times
-        # a second until self.searching hits zero.
-        self.updateOutput()
-
-
 def getType(id):
     ''' Matches a device's ID to its name.
     Does not cover every possible option, because there are so, so many.
@@ -378,17 +212,5 @@ def getType(id):
     return "Not Reconized, " + str(id)
 
 
-def main():
-    ''' Basic main method to set up GUI.'''
-    #subprocess.call('pyinstaller -h')# SearchFunction.py')
-
-    root = Tk()
-    root.title("Lantronix Device Searcher")
-
-    app = Application(root)
-    root.mainloop()
-
-def main2():
-    print("Answer: "+ str(searchIPFromMac())) #Ex: "0080A3CFEE24"
-main()
-#main2()
+search()
+print(output)

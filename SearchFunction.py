@@ -31,14 +31,7 @@ from codecs import decode
 # boot times
 
 # Main output string variable that transfers information
-output = ""
-# Format of output string
-# In hindsight, maybe I should have made this a list... 
-# oh well, this works fine.
-'''
-NAME::MAC_ADDRESS1::IP_ADDRESS1\n
-NAME::MAC_ADDRESS2::IP_ADDRESS2\n
-'''
+output = []
 
 # Global variables that determine some behavior in the thread that deals with
 # sending and receiving messages
@@ -54,7 +47,7 @@ def search():
     global output
     global timeoutTime
     global printMessages
-    output = ""
+    output = []
     # Set port and destination that the devices are listening on
     port = 30718
     dest = '<broadcast>'
@@ -86,7 +79,7 @@ def search():
 
             # Concatenate to global output variable, so other threads can see
             # Again, see 'format of output string' above.
-            output += name + "::" + MAC + "::" + server[0] + "\n"
+            output.append((name, MAC, server[0]))
     except timeout:
         # Hey, this was the easiest way to terminate.
         if printMessages:

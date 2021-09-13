@@ -119,4 +119,5 @@ if "--html" in sys.argv:
     for n in output:
         print('<p><a href="http://%s">%s, %s</a></p>' % (n[2], n[0], n[1]))
 else:
-    print(output)
+    for n in output:
+        print(n)

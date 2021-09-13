@@ -22,8 +22,6 @@
 from binascii import hexlify, unhexlify 
 # Used to broadcast and receive messages
 from socket import socket, SOL_SOCKET, SO_BROADCAST, timeout, AF_INET, SOCK_DGRAM
-# Only used in searchIPFromMac() to wait for search to finish
-from time import sleep
 # Used to search and keep GUI running
 from threading import Thread
 # Also used to decode hex strings
@@ -46,75 +44,6 @@ NAME::MAC_ADDRESS2::IP_ADDRESS2\n
 # sending and receiving messages
 timeoutTime = 2.0
 printMessages = False
-
-#--- IF CALLING THIS PROGRAM FROM ANOTHER PROGRAM, USE THIS METHOD
-def searchIPFromMac(macAddress = "{)}`", print_when_done_searching = False, timeout = 2.0):
-    ''' 
-    General case method where the MAC address is given, and the IP address is returned.
-    Broadcasts to all Lantronix devices, and looks for one with the correct MAC address.
-    If no MAC address is given, returns the list of devices found in a list of lists in
-    format [Device Name, MAC address, IP address]. Elements are as strings.
-
-    It is not reccommended to change the second or third variables, but if you want:
-    The second variable can be set to True if you wish it to print when it is done 
-    searching. The third variable can be changed if you wish to increase the time before
-    it stops searching.
-
-    If calling from another program, use this method!
-    '''
-    # Global is used so you can check search across threads
-    global output
-    global timeoutTime
-    global printMessages
-    timeoutTime = timeout
-    printMessages = print_when_done_searching
-
-    macAddress = macAddress.upper()
-    # Starts main method in main segment of program, which broadcasts and looks
-    # for responses.
-    listener = Thread(target=search, args=(), daemon=True)
-    listener.start()
-
-    # Anything the above thread finds will be added to the global output
-    # variable.  So, we check for the MAC address in it.
-    # I don't remember why I made the timeout counter slightly less than 2x.
-    times = timeoutTime * 1.8
-    while macAddress not in output:
-        sleep(.5)
-        if times < 0:
-            # If times hits 0, then MAC address is not found in search.
-            # If default mac address, then it should return the entire
-            # output. If not, then search has failed.
-            if macAddress == "{)}`":
-                # It occured to me that I probably shouldn't return
-                # this as a raw string. That'd probably be pretty
-                # annoying to work with. So this bit splits it into
-                # a list of lists.
-                devices = output.split("\n")
-                i = len(devices) - 1
-                while i > -1:
-                    devices[i] = devices[i].split("::")
-                    if len(devices[i])==1:
-                        del devices[i]
-                    i -= 1
-                return devices
-            else:
-                return -1
-        times -= 1
-
-    # Find IP address in the output string, since if it was not in output
-    # string, it would not have exited loop.
-    # See 'format of output string' above.
-    lines = output.split('\n')
-    for address in lines:
-        if(address != ""):
-            addresses = address.split('::')
-            if macAddress.strip() in addresses[1]:
-                return addresses[2]
-
-    #Should not get here, but if it does, something went wrong
-    return -1
-
 
 def search():
     '''

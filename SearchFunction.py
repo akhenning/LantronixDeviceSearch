@@ -18,6 +18,7 @@
 # I have nothing to do for the next hour, so you get unusually intimate and 
 # sarcastic comments for this program.
 
+import sys
 # Needed to decode the hex strings the devices communicate with
 from binascii import hexlify, unhexlify 
 # Used to broadcast and receive messages
@@ -114,4 +115,8 @@ def getType(id):
 
 
 search()
-print(output)
+if "--html" in sys.argv:
+    for n in output:
+        print('<p><a href="http://%s">%s, %s</a></p>' % (n[2], n[0], n[1]))
+else:
+    print(output)

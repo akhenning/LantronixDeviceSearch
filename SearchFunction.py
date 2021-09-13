@@ -87,57 +87,30 @@ def search():
     
 
 def getType(id):
-    ''' Matches a device's ID to its name.
-    Does not cover every possible option, because there are so, so many.
-    '''
-    # what, no switch statement?
-    if id == "X6":
-        return "xPico"
-    if id == "6X":
-        return "xPico110"
-    if id == "PA":
-        return "xPico-IAP"
-    if id == "Y1":
-        return "xPico Wi-Fi"
-    if id == "Y2":
-        return "xPico240"
-    if id == "Y3":
-        return "xPico250"
-    if id == "X2":
-        return "XPort-03/04"
-    if id == "XA":
-        return "XPort-IAP"
-    if id == "XM":
-        return "XPort-IAP"
-    if id == "YM":
-        return "XPort-IAP-05"
-    if id == "V2":
-        return "LTX110"
-    if id == "SC":
-        return "SecureLinx Console Manager"
-    if id == "S1":
-        return "SLC01 (Console Server)"
-    if id == "3Q":
-        return "UDS-10/Cobox 4.x"
-    if id == "X9":
-        return "XPort-05"
-    if id == "U4":
-        return "UDS2100"
-    if id == "U5":
-        return "XDirect"
-    if id == "X7":
-        return "XPort Direct"
-    if id == "X8":
-        return "XPort Direct+"
-    if id == "Y4":
-        return "XPort EDGE"
-    if id == "W1":
-        return "WiPort"
-    if id == "E5":
-        return "XPort Pro"
-    if id == "":
-        return ""
-    return "Not Reconized, " + str(id)
+    return {
+        "X6": "xPico",
+        "6X": "xPico110",
+        "PA": "xPico-IAP",
+        "Y1": "xPico Wi-Fi",
+        "Y2": "xPico240",
+        "Y3": "xPico250",
+        "X2": "XPort-03/04",
+        "XA": "XPort-IAP",
+        "XM": "XPort-IAP",
+        "YM": "XPort-IAP-05",
+        "V2": "LTX110",
+        "SC": "SecureLinx Console Manager",
+        "S1": "SLC01 (Console Server)",
+        "3Q": "UDS-10/Cobox 4.x",
+        "X9": "XPort-05",
+        "U4": "UDS2100",
+        "U5": "XDirect",
+        "X7": "XPort Direct",
+        "X8": "XPort Direct+",
+        "Y4": "XPort EDGE",
+        "W1": "WiPort",
+        "E5": "XPort Pro",
+        "": ""}.get(id, "Not Recognized, " + str(id))
 
 
 search()

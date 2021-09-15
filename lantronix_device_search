@@ -116,9 +116,15 @@ def getType(id):
 
 
 search()
+
+def output_html(n):
+    print('<p><a href="http://%s">%s, %s</a></p>' % (n[2], n[0], n[1]))
+
+def output_list(f):
+    for n in sorted(output, key = lambda x: x[1]):
+        f(n)
+
 if "--html" in sys.argv:
-    for n in output:
-        print('<p><a href="http://%s">%s, %s</a></p>' % (n[2], n[0], n[1]))
+    output_list(output_html)
 else:
-    for n in output:
-        print(n)
+    output_list(print)

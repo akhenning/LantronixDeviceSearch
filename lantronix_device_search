@@ -32,23 +32,12 @@ from codecs import decode
 # I did my best to import only what I need to try to speed up
 # boot times
 
-# Main output string variable that transfers information
-output = []
-
-# Global variables that determine some behavior in the thread that deals with
-# sending and receiving messages
-timeoutTime = 2.0
-printMessages = False
-
-def search():
+def search(timeoutTime = 2.0, printMessages = False):
     '''
     Broadcasts a message to all Lantronix devices, listens for responses, 
     and gets MAC and IP addresses from the responses. Outputs these values
     through the global variable output.
     '''
-    global output
-    global timeoutTime
-    global printMessages
     output = []
     # Set port and destination that the devices are listening on
     port = 30718
@@ -86,6 +75,7 @@ def search():
         # Hey, this was the easiest way to terminate.
         if printMessages:
             print('done searching')
+    return output
     
 
 def getType(id):
@@ -114,17 +104,14 @@ def getType(id):
         "E5": "XPort Pro",
         "": ""}.get(id, "Not Recognized, " + str(id))
 
-
-search()
-
 def output_html(n):
     print('<p><a href="http://%s">%s, %s</a></p>' % (n[2], n[0], n[1]))
 
-def output_list(f):
+def output_list(f, output):
     for n in sorted(output, key = lambda x: x[1]):
         f(n)
 
 if "--html" in sys.argv:
-    output_list(output_html)
+    output_list(output_html, search())
 else:
-    output_list(print)
+    output_list(print, search())

@@ -67,6 +67,7 @@ def search(timeoutTime = 2.0, printMessages = False):
             name = getType(id)
 
             MAC = MAC[-12:].upper()
+            MAC = ":".join(MAC[pos:pos + 2] for pos in range(0, len(MAC), 2))
 
             # Concatenate to global output variable, so other threads can see
             # Again, see 'format of output string' above.
@@ -112,6 +113,6 @@ def output_list(f, output):
         f(n)
 
 if "--html" in sys.argv:
-    output_list(output_html, search())
+    output_list(output_html, search(printMessages=("-v" in sys.argv)))
 else:
-    output_list(print, search())
+    output_list(print, search(printMessages=("-v" in sys.argv)))
